@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Table, Button, Modal, Form, Alert, Spinner, Image } from "react-bootstrap";
-import { fetchProducts, addProduct, updateProduct, deleteProduct } from "../services/ProductService";
+import { fetchProducts, addProduct, updateProduct, deleteProduct } from "../services/productService";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
