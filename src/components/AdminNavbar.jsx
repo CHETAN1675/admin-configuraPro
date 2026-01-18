@@ -38,10 +38,14 @@ export default function AdminNavbar() {
                 <Nav.Link as={NavLink} to="/products">
                   Products
                 </Nav.Link>
+
                 <Nav.Link as={NavLink} to="/orders">
                   Orders
                 </Nav.Link>
-                <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+
+                <Nav.Link onClick={handleLogout}>
+                  Logout
+                </Nav.Link>
               </>
             )}
           </Nav>

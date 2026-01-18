@@ -1,10 +1,11 @@
-const DB_URL = "https://configurapro-default-rtdb.firebaseio.com/products";
+const DB_URL =
+  "https://configurapro-default-rtdb.firebaseio.com/products";
 
 export const fetchProducts = async () => {
   const res = await fetch(`${DB_URL}.json`);
   const data = await res.json();
   if (!data) return [];
-  return Object.entries(data).map(([id, prod]) => ({ id, ...prod }));
+  return Object.entries(data).map(([id, p]) => ({ id, ...p }));
 };
 
 export const addProduct = async (product) => {
