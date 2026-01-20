@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
-import {Table,Button,Spinner,Alert,Badge,Dropdown,ButtonGroup} from "react-bootstrap";
-import {fetchOrders,updateOrderStatus,deleteOrder} from "../services/orderServices";
+import {
+  Table,
+  Button,
+  Spinner,
+  Alert,
+  Badge,
+  Dropdown,
+  ButtonGroup,
+  Image,
+} from "react-bootstrap";
+import {
+  fetchOrders,
+  updateOrderStatus,
+  deleteOrder,
+  updatePaymentStatus,
+} from "../services/orderServices";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -24,40 +38,57 @@ export default function Orders() {
   }, []);
 
   const handleStatusChange = async (userKey, orderId, status) => {
-  try {
-    await updateOrderStatus(userKey, orderId, status);
+    try {
+      await updateOrderStatus(userKey, orderId, status);
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId ? { ...o, status } : o
+        )
+      );
+    } catch {
+      setError("Failed to update order status");
+    }
+  };
 
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId
-          ? { ...order, status }
-          : order
-      )
-    );
-  } catch {
-    setError("Failed to update order status");
-  }
-};
+  const handlePaymentChange = async (userKey, orderId, status) => {
+    try {
+      await updatePaymentStatus(userKey, orderId, status);
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId
+            ? {
+                ...o,
+                paymentMethod: {
+                  ...o.paymentMethod,
+                  status,
+                },
+              }
+            : o
+        )
+      );
+    } catch {
+      setError("Failed to update payment status");
+    }
+  };
 
+  const handleDelete = async (userKey, orderId) => {
+    if (!window.confirm("Delete this order?")) return;
 
- const handleDelete = async (userKey, orderId) => {
-  if (!window.confirm("Delete this order?")) return;
+    try {
+      await deleteOrder(userKey, orderId);
+      setOrders((prev) =>
+        prev.filter((o) => o.id !== orderId)
+      );
+    } catch {
+      setError("Failed to delete order");
+    }
+  };
 
-  try {
-    await deleteOrder(userKey, orderId);
-
-    setOrders((prev) =>
-      prev.filter((o) => o.id !== orderId)
-    );
-  } catch {
-    setError("Failed to delete order");
-  }
-};
-
+  if (loading) return <Spinner className="mt-4" />;
 
   return (
     <div className="container mt-4">
-      <h2>Orders</h2>
+      <h2>Orders (Admin)</h2>
 
       {error && <Alert variant="danger">{error}</Alert>}
 
@@ -85,34 +116,114 @@ export default function Orders() {
             orders.map((order) => (
               <tr key={order.id}>
                 <td>{order.id}</td>
-
                 <td>{order.userEmail}</td>
 
+                {/* ITEMS */}
                 <td>
-                  {order.items?.map((item, i) => (
-                    <div key={i}>
-                      {item.name} × {item.quantity}
-                    </div>
-                  ))}
+                  {order.items?.map((item, i) => {
+                    const d = item.dimensions || {};
+                    const dimText =
+                      d.width && d.height && d.depth
+                        ? `${d.width}×${d.height}×${d.depth}`
+                        : "-";
+
+                    return (
+                      <div
+                        key={i}
+                        className="d-flex gap-2 mb-2 align-items-start"
+                      >
+                        {item.product?.image && (
+                          <Image
+                            src={item.product.image}
+                            rounded
+                            style={{
+                              width: 50,
+                              height: 50,
+                              objectFit: "contain",
+                            }}
+                          />
+                        )}
+                        <div>
+                          <strong>
+                            {item.product?.name || "Product"}
+                          </strong>
+                          <div className="small text-muted">
+                            Capacity: {item.capacity || "-"} <br />
+                            Material: {item.material || "-"} <br />
+                            Dimensions: {dimText} <br />
+                            Add-ons:{" "}
+                            {item.addOns?.length
+                              ? item.addOns.join(", ")
+                              : "-"}
+                          </div>
+                          <div className="fw-bold">
+                            ₹{item.totalPrice}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </td>
 
                 <td>₹{order.totalPrice}</td>
 
-                <td>
-                  {order.paymentMethod?.type || "N/A"}
-                  <br />
-                  <small className="text-muted">
-                    {order.paymentMethod?.status}
-                  </small>
-                </td>
+               {/* PAYMENT */}
+               <td>
+                <div className="mb-1">
+                 {order.paymentMethod?.type || "N/A"}
+                </div>
 
+               {/* Payment Status Badge */}
+                <Badge
+                 className="mb-2"
+                 bg={
+                  order.paymentMethod?.status === "PAID"
+                  ? "success"
+                  : order.paymentMethod?.status === "FAILED"
+                  ? "danger"
+                : "warning"
+                    }
+                >
+              {order.paymentMethod?.status || "PENDING"}
+               </Badge>
+
+              {/* Change Payment Status */}
+               <Dropdown className="mt-1">
+                <Dropdown.Toggle
+                 size="sm"
+                 variant="outline-secondary"
+                 >
+                 Change
+                </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+               {["PENDING", "PAID", "FAILED"].map((status) => (
+               <Dropdown.Item
+                 key={status}
+                 onClick={() =>
+                  handlePaymentChange(
+                 order.userKey,
+                 order.id,
+                 status
+                 )
+                 }
+                 >
+                  {status}
+                 </Dropdown.Item>
+                 ))}
+                 </Dropdown.Menu>
+               </Dropdown>
+          </td>
+
+
+                {/* ORDER STATUS */}
                 <td>
                   <Badge
                     bg={
-                      order.status === "PENDING"
-                        ? "warning"
-                        : order.status === "CANCELLED"
+                      order.status === "CANCELLED"
                         ? "danger"
+                        : order.status === "CREATED"
+                        ? "warning"
                         : "success"
                     }
                   >
@@ -120,20 +231,16 @@ export default function Orders() {
                   </Badge>
                 </td>
 
+                {/* ACTIONS */}
                 <td>
                   <Dropdown as={ButtonGroup} className="me-2">
                     <Button size="sm" variant="secondary">
                       Change
                     </Button>
-
-                    <Dropdown.Toggle
-                      split
-                      size="sm"
-                      variant="secondary"
-                    />
+                    <Dropdown.Toggle split size="sm" />
 
                     <Dropdown.Menu>
-                      {["PENDING", "COMPLETED", "CANCELLED"].map(
+                      {["CREATED", "COMPLETED", "CANCELLED"].map(
                         (status) => (
                           <Dropdown.Item
                             key={status}

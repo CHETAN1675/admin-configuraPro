@@ -37,3 +37,19 @@ export const deleteOrder = async (userKey, orderId) => {
     method: "DELETE"
   });
 };
+
+export const updatePaymentStatus = async (userKey, orderId, status) => {
+  const res = await fetch(
+    `${DB_URL}/${userKey}/${orderId}/paymentMethod.json`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to update payment");
+  }
+};
+
