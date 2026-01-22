@@ -1,16 +1,82 @@
-# React + Vite
+# ConfiguraPro Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ConfiguraPro Admin is the backend-facing React application used to create and manage
+products for the ConfiguraPro client configurator.
 
-Currently, two official plugins are available:
+All configuration data (materials, capacities, dimensions, pricing, images)
+is created here and stored in Firebase Realtime Database.
+The client application only reads this data.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React (Vite)
+- Redux Toolkit
+- Firebase Authentication
+- Firebase Realtime Database
+- React Router
+- Bootstrap
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+
+src/
+├─ assets/
+├─ components/
+│  ├─ AdminNavbar.jsx
+│  ├─ AuthModal.jsx
+│  ├─ ProductForm.jsx
+│  └─ ProductList.jsx
+├─ features/
+│  └─ auth/
+│     └─ authSlice.js
+├─ pages/
+│  ├─ Dashboard.jsx
+│  ├─ Orders.jsx
+│  └─ Products.jsx
+├─ routes/
+│  └─ AppRoute.jsx
+├─ services/
+│  ├─ firebaseAuth.js
+│  ├─ orderServices.js
+│  └─ productService.js
+├─ store/
+│  └─ store.js
+├─ App.jsx
+└─ main.jsx
+
+---
+
+## Product Data Structure (CRITICAL)
+
+Every product saved from admin must follow this exact structure.
+The client configurator depends on it.
+
+```json
+{
+  "name": "1ton",
+  "price": 6000,
+  "image": "image-url-or-base64",
+  "materials": [
+    {
+      "name": "rubber",
+      "price": 2000
+    },
+    {
+      "name": "steel",
+      "price": 5000
+    }
+  ],
+  "capacities": [
+    {
+      "name": "1ton",
+      "price": 6000,
+      "dimensions": [
+        "5x6x7",
+        "7x8x9"
+      ]
+    }
+  ]
+}
