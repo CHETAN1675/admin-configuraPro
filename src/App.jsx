@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import AppRoutes from "./routes/AppRoute";
 import { restoreAdmin } from "./features/auth/authSlice";
+import Footer from "./components/layout/Footer";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -13,5 +14,12 @@ export default function App() {
     }
   }, [dispatch]);
 
-  return <AppRoutes />;
+  return(
+    <div className="d-flex flex-column min-vh-100">
+      <div className="flex-grow-1">
+        <AppRoutes />
+      </div>
+      <Footer />
+    </div>
+)
 }
