@@ -1,20 +1,8 @@
-import { Modal, Form, Button, Card } from "react-bootstrap";
+import { useState } from "react";
 
-const emptyProduct = {
-  name: "",
-  image: "",
-  materials: [],
-  capacities: [],
-};
+export default function ProductForm({ show, onClose, onSave, product, setProduct, editing }) {
+  if (!show) return null;
 
-export default function ProductForm({
-  show,
-  onClose,
-  onSave,
-  product,
-  setProduct,
-  editing,
-}) {
   const addMaterial = () => {
     setProduct({
       ...product,
@@ -25,10 +13,7 @@ export default function ProductForm({
   const addCapacity = () => {
     setProduct({
       ...product,
-      capacities: [
-        ...product.capacities,
-        { name: "", price: "", dimensions: [] },
-      ],
+      capacities: [...product.capacities, { name: "", price: "", dimensions: [] }],
     });
   };
 
@@ -39,132 +24,161 @@ export default function ProductForm({
   };
 
   return (
-    <Modal size="lg" show={show} onHide={onClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>{editing ? "Edit Product" : "Add Product"}</Modal.Title>
-      </Modal.Header>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose} >
+      <div className="relative w-full max-w-5xl mx-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-2xl shadow-2xl overflow-auto max-h-[90vh] border border-white/30 dark:border-slate-700/40 animate-fadeIn">
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 border-b border-white/20 dark:border-slate-700/50">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {editing ? "Edit Product" : "Add Product"}
+          </h2>
+          <button
+            className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-2xl transition"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        </div>
 
-      <Modal.Body>
-        {/* PRODUCT DETAILS */}
-        <Card className="p-3 mb-3">
-          <Form.Group className="mb-2">
-            <Form.Label>Product Name</Form.Label>
-            <Form.Control
-              value={product.name}
-              onChange={(e) =>
-                setProduct({ ...product, name: e.target.value })
-              }
-            />
-          </Form.Group>
-
-          <Form.Group>
-            <Form.Label>Image URL</Form.Label>
-            <Form.Control
-              value={product.image}
-              onChange={(e) =>
-                setProduct({ ...product, image: e.target.value })
-              }
-            />
-          </Form.Group>
-        </Card>
-
-        {/* MATERIALS */}
-        <Card className="p-3 mb-3">
-          <h5>Materials</h5>
-
-          {product.materials.map((m, i) => (
-            <div key={i} className="d-flex gap-2 mb-2">
-              <Form.Control
-                placeholder="Material"
-                value={m.name}
-                onChange={(e) => {
-                  const copy = [...product.materials];
-                  copy[i].name = e.target.value;
-                  setProduct({ ...product, materials: copy });
-                }}
+        <div className="p-6 space-y-8">
+          {/* PRODUCT DETAILS */}
+          <div className="p-6 rounded-xl shadow-md bg-gradient-to-br from-white/50 to-white/30 dark:from-slate-800/50 dark:to-slate-900/40 border border-white/20 dark:border-slate-700/40 backdrop-blur-sm">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Product Details</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Product Name"
+                className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/60 dark:bg-slate-700/60 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+                value={product.name}
+                onChange={(e) => setProduct({ ...product, name: e.target.value })}
               />
-              <Form.Control
-                type="number"
-                placeholder="Price"
-                value={m.price}
-                onChange={(e) => {
-                  const copy = [...product.materials];
-                  copy[i].price = Number(e.target.value);
-                  setProduct({ ...product, materials: copy });
-                }}
+              <input
+                type="text"
+                placeholder="Image URL"
+                className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/60 dark:bg-slate-700/60 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+                value={product.image}
+                onChange={(e) => setProduct({ ...product, image: e.target.value })}
               />
             </div>
-          ))}
+          </div>
 
-          <Button size="sm" onClick={addMaterial}>
-            Add Material
-          </Button>
-        </Card>
-
-        {/* CAPACITIES */}
-        <Card className="p-3">
-          <h5>Capacities & Dimensions</h5>
-
-          {product.capacities.map((cap, ci) => (
-            <Card key={ci} className="p-3 mb-3">
-              <div className="d-flex gap-2 mb-2">
-                <Form.Control
-                  placeholder="Capacity (e.g. 20 Ton)"
-                  value={cap.name}
-                  onChange={(e) => {
-                    const copy = [...product.capacities];
-                    copy[ci].name = e.target.value;
-                    setProduct({ ...product, capacities: copy });
-                  }}
-                />
-                <Form.Control
-                  type="number"
-                  placeholder="Price"
-                  value={cap.price}
-                  onChange={(e) => {
-                    const copy = [...product.capacities];
-                    copy[ci].price = Number(e.target.value);
-                    setProduct({ ...product, capacities: copy });
-                  }}
-                />
-              </div>
-
-              <strong>Dimensions</strong>
-              {cap.dimensions.map((d, di) => (
-                <Form.Control
-                  key={di}
-                  className="mt-2"
-                  placeholder="e.g. 2 x 2 x 2 or Radius 4 x Length 3"
-                  value={d}
-                  onChange={(e) => {
-                    const copy = [...product.capacities];
-                    copy[ci].dimensions[di] = e.target.value;
-                    setProduct({ ...product, capacities: copy });
-                  }}
-                />
+          {/* MATERIALS */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Materials</h3>
+            <div className="space-y-3">
+              {product.materials.map((m, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col md:flex-row gap-3 p-4 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm rounded-xl shadow hover:shadow-lg transition"
+                >
+                  <input
+                    type="text"
+                    placeholder="Material Name"
+                    className="flex-1 p-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800/50 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-yellow-400 transition"
+                    value={m.name}
+                    onChange={(e) => {
+                      const copy = [...product.materials];
+                      copy[i].name = e.target.value;
+                      setProduct({ ...product, materials: copy });
+                    }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    className="w-32 p-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800/50 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-yellow-400 transition"
+                    value={m.price}
+                    onChange={(e) => {
+                      const copy = [...product.materials];
+                      copy[i].price = Number(e.target.value);
+                      setProduct({ ...product, materials: copy });
+                    }}
+                  />
+                </div>
               ))}
-
-              <Button
-                size="sm"
-                className="mt-2"
-                onClick={() => addDimension(ci)}
+              <button
+                onClick={addMaterial}
+                className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-white rounded-xl font-semibold shadow-lg transition"
               >
-                Add Dimension
-              </Button>
-            </Card>
-          ))}
+                + Add Material
+              </button>
+            </div>
+          </div>
 
-          <Button size="sm" onClick={addCapacity}>
-            Add Capacity
-          </Button>
-        </Card>
-      </Modal.Body>
+          {/* CAPACITIES */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Capacities & Dimensions</h3>
+            {product.capacities.map((cap, ci) => (
+              <div
+                key={ci}
+                className="p-4 bg-gradient-to-br from-white/50 to-white/30 dark:from-slate-800/50 dark:to-slate-900/40 backdrop-blur-sm rounded-2xl shadow-md space-y-3 border border-white/20 dark:border-slate-700/40"
+              >
+                <div className="flex flex-col md:flex-row gap-3">
+                  <input
+                    type="text"
+                    placeholder="Capacity Name"
+                    className="flex-1 p-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/60 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-400 transition"
+                    value={cap.name}
+                    onChange={(e) => {
+                      const copy = [...product.capacities];
+                      copy[ci].name = e.target.value;
+                      setProduct({ ...product, capacities: copy });
+                    }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    className="w-32 p-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/60 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-400 transition"
+                    value={cap.price}
+                    onChange={(e) => {
+                      const copy = [...product.capacities];
+                      copy[ci].price = Number(e.target.value);
+                      setProduct({ ...product, capacities: copy });
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-slate-900 dark:text-white pr-2">Dimensions</strong>
+                  {cap.dimensions.map((d, di) => (
+                    <input
+                      key={di}
+                      type="text"
+                      placeholder="e.g. 2 x 2 x 2"
+                      className="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/60 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-400 transition"
+                      value={d}
+                      onChange={(e) => {
+                        const copy = [...product.capacities];
+                        copy[ci].dimensions[di] = e.target.value;
+                        setProduct({ ...product, capacities: copy });
+                      }}
+                    />
+                  ))}
+                  <button
+                    onClick={() => addDimension(ci)}
+                    className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition"
+                  >
+                    + Add Dimension
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button
+              onClick={addCapacity}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold shadow-lg transition"
+            >
+              + Add Capacity
+            </button>
+          </div>
+        </div>
 
-      <Modal.Footer>
-        <Button onClick={onSave}>
-          {editing ? "Update Product" : "Save Product"}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        {/* Footer */}
+        <div className="flex justify-end p-6 border-t border-white/20 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-b-2xl">
+          <button
+            onClick={onSave}
+            className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-semibold shadow-lg transition"
+          >
+            {editing ? "Update Product" : "Save Product"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

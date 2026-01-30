@@ -9,40 +9,54 @@ import Dashboard from "../pages/Dashboard";
 import Products from "../pages/Products";
 import Orders from "../pages/Orders";
 
+// Optional Layout wrapper for pages
+function Layout({ children }) {
+  return <div className="flex-1 px-4 md:px-6 lg:px-8 py-6">{children}</div>;
+}
 
 export default function AppRoutes() {
   const token = useSelector((s) => s.auth.token);
   const [showAuth, setShowAuth] = useState(!token);
 
+  if (!token) {
+    // Show AuthModal for non-logged-in users
+    return <AuthModal show={showAuth} onHide={() => setShowAuth(false)} />;
+  }
+
   return (
     <>
-      {token && <AdminNavbar />}
+      {/* Navbar always visible for logged-in admin */}
+      <AdminNavbar />
 
       <Routes>
-        {token ? (
-          <>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/orders" element={<Orders />} />
-            
-
-            {/* fallback for logged-in admin */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </>
-        ) : (
-          <>
-            {/* block all routes when not logged in */}
-            <Route path="*" element={null} />
-          </>
-        )}
-      </Routes>
-
-      {!token && (
-        <AuthModal
-          show={showAuth}
-          onHide={() => setShowAuth(false)}
+        <Route
+          path="/"
+          element={
+            <Layout>
+              <Dashboard />
+            </Layout>
+          }
         />
-      )}
+        <Route
+          path="/products"
+          element={
+            <Layout>
+              <Products />
+            </Layout>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <Layout>
+              <Orders />
+            </Layout>
+          }
+        />
+
+        {/* Fallback for any unknown routes */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </>
   );
 }

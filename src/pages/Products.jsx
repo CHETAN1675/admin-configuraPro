@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
 import ProductForm from "../components/ProductForm";
 import ProductList from "../components/ProductList";
 import {
@@ -22,42 +21,39 @@ export default function Products() {
   const [editing, setEditing] = useState(false);
   const [current, setCurrent] = useState(emptyProduct);
 
-const load = async () => {
-  const data = await fetchProducts();
+  const load = async () => {
+    const data = await fetchProducts();
 
-  const normalized = data.map((p) => ({
-    ...p,
-    materials: Array.isArray(p.materials)
-      ? p.materials
-      : Object.entries(p.materials || {}).map(
-          ([name, price]) => ({ name, price })
-        ),
+    const normalized = data.map((p) => ({
+      ...p,
+      materials: Array.isArray(p.materials)
+        ? p.materials
+        : Object.entries(p.materials || {}).map(
+            ([name, price]) => ({ name, price })
+          ),
+      capacities: Array.isArray(p.capacities)
+        ? p.capacities
+        : Object.entries(p.capacities || {}).map(
+            ([name, value]) => ({
+              name,
+              price: value.price || 0,
+              dimensions: value.dimensions || [],
+            })
+          ),
+    }));
 
-    capacities: Array.isArray(p.capacities)
-      ? p.capacities
-      : Object.entries(p.capacities || {}).map(
-          ([name, value]) => ({
-            name,
-            price: value.price || 0,
-            dimensions: value.dimensions || [],
-          })
-        ),
-  }));
-
-  setProducts(normalized);
-};
-
+    setProducts(normalized);
+  };
 
   useEffect(() => {
     load();
   }, []);
 
   const save = async () => {
-    if (editing) {
-      await updateProduct(current.id, current);
-    } else {
-      await addProduct(current);
-    }
+    editing
+      ? await updateProduct(current.id, current)
+      : await addProduct(current);
+
     setShow(false);
     setEditing(false);
     setCurrent(emptyProduct);
@@ -77,19 +73,29 @@ const load = async () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Products</h2>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          Products
+        </h1>
 
-      <Button className="mb-3" onClick={() => setShow(true)}>
-        Add Product
-      </Button>
+        <button
+          onClick={() => setShow(true)}
+          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition font-medium"
+        >
+          + Add Product
+        </button>
+      </div>
 
+      {/* Table */}
       <ProductList
         products={products}
         onEdit={edit}
         onDelete={remove}
       />
 
+      {/* Modal */}
       <ProductForm
         show={show}
         onClose={() => {
