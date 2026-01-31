@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductForm from "../components/ProductForm";
 import ProductList from "../components/ProductList";
 import {
@@ -20,6 +20,7 @@ export default function Products() {
   const [show, setShow] = useState(false);
   const [editing, setEditing] = useState(false);
   const [current, setCurrent] = useState(emptyProduct);
+  const [search, setSearch] = useState("");
 
   const load = async () => {
     const data = await fetchProducts();
@@ -28,18 +29,17 @@ export default function Products() {
       ...p,
       materials: Array.isArray(p.materials)
         ? p.materials
-        : Object.entries(p.materials || {}).map(
-            ([name, price]) => ({ name, price })
-          ),
+        : Object.entries(p.materials || {}).map(([name, price]) => ({
+            name,
+            price,
+          })),
       capacities: Array.isArray(p.capacities)
         ? p.capacities
-        : Object.entries(p.capacities || {}).map(
-            ([name, value]) => ({
-              name,
-              price: value.price || 0,
-              dimensions: value.dimensions || [],
-            })
-          ),
+        : Object.entries(p.capacities || {}).map(([name, value]) => ({
+            name,
+            price: value.price || 0,
+            dimensions: value.dimensions || [],
+          })),
     }));
 
     setProducts(normalized);
@@ -48,6 +48,15 @@ export default function Products() {
   useEffect(() => {
     load();
   }, []);
+
+  /* -------- Search Filter -------- */
+  const filteredProducts = useMemo(() => {
+    if (!search.trim()) return products;
+
+    return products.filter((p) =>
+      p.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [products, search]);
 
   const save = async () => {
     editing
@@ -73,24 +82,52 @@ export default function Products() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           Products
         </h1>
 
-        <button
-          onClick={() => setShow(true)}
-          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition font-medium"
-        >
-          + Add Product
-        </button>
+        <div className="flex gap-3">
+          {/* Search */}
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by product name..."
+            className="w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+                       focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                       dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          />
+
+          <button
+            onClick={() => setShow(true)}
+            className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+          >
+            + Add Product
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* Empty state */}
+      {!filteredProducts.length && (
+        <p className="mt-10 text-center text-slate-500">
+          No products found
+          {search && (
+            <>
+              {" "}
+              for{" "}
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                “{search}”
+              </span>
+            </>
+          )}
+        </p>
+      )}
+
+      {/* Table / List */}
       <ProductList
-        products={products}
+        products={filteredProducts}
         onEdit={edit}
         onDelete={remove}
       />
