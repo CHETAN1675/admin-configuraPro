@@ -24,8 +24,9 @@ export default function ProductForm({ show, onClose, onSave, product, setProduct
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose} >
-      <div className="relative w-full max-w-5xl mx-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-2xl shadow-2xl overflow-auto max-h-[90vh] border border-white/30 dark:border-slate-700/40 animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative w-full max-w-5xl mx-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-2xl shadow-2xl overflow-auto max-h-[90vh] border border-white/30 dark:border-slate-700/40 animate-fadeIn" 
+        onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-white/20 dark:border-slate-700/50">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
